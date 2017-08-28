@@ -1,3 +1,4 @@
+import re
 headlines = {}
 
 def create_headline_list(filename):
@@ -6,11 +7,17 @@ def create_headline_list(filename):
   for lines in text:
     values = lines.split(',',4)
     data = (values[2],values[1][1:-1],values[0])
-    headline = (values[3][1:-1],values[4][1:-2])
-    print(headline)
+
+    # aspas ao final
+    headline = re.sub("((''|\")(\.|,|\?|!|;|:))","”",values[4][1:-2])
+    # todas as outras aspas (por suposto, no início)
+    headline = re.sub("(''|\")","“",headline)
+
+    # parzinho jornal/notícia
+    tup_headline = (values[3][1:-1], values[4][1:-2])
     if data not in headlines:
       headlines[data] = []
-    headlines[data].append(headline)
+    headlines[data].append(tup_headline)
   print(headlines)
 
   return text
