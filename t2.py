@@ -2,6 +2,7 @@ import re
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
 from nltk.collocations import BigramCollocationFinder
+from nltk.metrics import BigramAssocMeasures
 
 headlines = {}
 bag_of_words = {}
@@ -11,13 +12,18 @@ def create_headline_list(filename):
   text = f.readlines()
 
   bad_bad_words = stopwords.words('portuguese')
+  word_list = []
 
   for lines in text:
     values = lines.split(',',4)
     date = (values[2],values[1][1:-1],values[0])
 
+    headline = values[4][1:-2]
+
+    # remove html special characters (probably should be smarter to decode them, but...)
+    headline = re.sub('&.+;','',headline)
     # ending quotes
-    headline = re.sub("((''|\")(\.|,|\?|!|;| |:))","\"",values[4][1:-2])
+    headline = re.sub("((''|\")(\.|,|\?|!|;| |:))","\"",headline)
     # all other quotations (which I imagine are at the start of quotes)
     headline = re.sub("(''|\")","\"",headline)
 
@@ -28,10 +34,14 @@ def create_headline_list(filename):
     headlines[date].append(tup_headline)
     # append new words found in this headline to our bag_of_words
     for word in word_tokenize(headline):
+
       # doesn't add a word if it's in stopwords list
       if word not in bad_bad_words:
+        word_list.append(word)
         bag_of_words[word] = True
-  print(bag_of_words)
+  bcf = BigramCollocationFinder.from_words(word_list)
+  # bcf.nbest(BigramAssocMeasures.likelihood_ratio, 4)
+  print(bcf.nbest(BigramAssocMeasures.likelihood_ratio, 10))
 
   return text
   f.close()
