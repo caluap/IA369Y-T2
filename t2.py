@@ -1,6 +1,7 @@
 import re
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
+from nltk.collocations import BigramCollocationFinder
 
 headlines = {}
 bag_of_words = {}
@@ -13,7 +14,7 @@ def create_headline_list(filename):
 
   for lines in text:
     values = lines.split(',',4)
-    data = (values[2],values[1][1:-1],values[0])
+    date = (values[2],values[1][1:-1],values[0])
 
     # ending quotes
     headline = re.sub("((''|\")(\.|,|\?|!|;| |:))","\"",values[4][1:-2])
@@ -22,10 +23,12 @@ def create_headline_list(filename):
 
     # newspaper / headline pair
     tup_headline = (values[3][1:-1], values[4][1:-2])
-    if data not in headlines:
-      headlines[data] = []
-    headlines[data].append(tup_headline)
+    if date not in headlines:
+      headlines[date] = []
+    headlines[date].append(tup_headline)
+    # append new words found in this headline to our bag_of_words
     for word in word_tokenize(headline):
+      # doesn't add a word if it's in stopwords list
       if word not in bad_bad_words:
         bag_of_words[word] = True
   print(bag_of_words)
