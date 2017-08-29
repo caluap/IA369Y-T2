@@ -8,17 +8,16 @@ def create_headline_list(filename):
     values = lines.split(',',4)
     data = (values[2],values[1][1:-1],values[0])
 
-    # aspas ao final
-    headline = re.sub("((''|\")(\.|,|\?|!|;|:))","”",values[4][1:-2])
-    # todas as outras aspas (por suposto, no início)
-    headline = re.sub("(''|\")","“",headline)
+    # ending quotes
+    headline = re.sub("((''|\")(\.|,|\?|!|;| |:))","\"",values[4][1:-2])
+    # all other quotations (which I imagine are at the start of quotes)
+    headline = re.sub("(''|\")","\"",headline)
 
-    # parzinho jornal/notícia
+    # newspaper / headline pair
     tup_headline = (values[3][1:-1], values[4][1:-2])
     if data not in headlines:
       headlines[data] = []
     headlines[data].append(tup_headline)
-  print(headlines)
 
   return text
   f.close()
