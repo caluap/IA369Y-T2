@@ -1,11 +1,19 @@
 import re
+
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
 from nltk.collocations import BigramCollocationFinder
 from nltk.metrics import BigramAssocMeasures
 
+
+# this is arbitrary, and should be better thought out in the future
+N_BIGRAMS = 12
+
 headlines = {}
 bag_of_words = {}
+
+def create_bag_of_words(words):
+  return dict([word, True] for word in words)
 
 def create_headline_list(filename):
   f = open(filename,'rU')
@@ -35,16 +43,16 @@ def create_headline_list(filename):
     # append new words found in this headline to our bag_of_words
     for word in word_tokenize(headline):
 
-      # doesn't add a word if it's in stopwords list
+      # doesn't add a word if it's in the stopwords list
       if word not in bad_bad_words:
         word_list.append(word)
         bag_of_words[word] = True
-  bcf = BigramCollocationFinder.from_words(word_list)
-  # bcf.nbest(BigramAssocMeasures.likelihood_ratio, 4)
-  print(bcf.nbest(BigramAssocMeasures.likelihood_ratio, 10))
 
-  return text
+  # creates and appends the N_BIGRAMS most common bigrams to the bag of words
+  bcf = BigramCollocationFinder.from_words(word_list)
+  bag_of_words.update(create_bag_of_words(bcf.nbest(BigramAssocMeasures.likelihood_ratio,N_BIGRAMS)))
   f.close()
+  return text
 
 def main():
   text = create_headline_list('manchetesBrasildatabase/manchetesBrasildatabase.csv')
