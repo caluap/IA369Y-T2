@@ -13,6 +13,7 @@ N_BIGRAMS = 12
 
 headlines = {}
 bag_of_words = {}
+headline_polarities = {}
 
 def create_bag_of_words(words):
   return dict([word, True] for word in words)
@@ -59,13 +60,51 @@ def main():
   create_headline_list('manchetesBrasildatabase/manchetesBrasildatabase.csv')
   sn = Senticnet('pt')
 
-  # print(headlines[('2017','agosto','23')])
-  for h in headlines[('2017','agosto','23')]:
-    for w in word_tokenize(h[1]):
-      try:
-        print('sim (%s): %s' % (w,sn.concept(w)) )
-      except:
-        print('nope: %s' % w)
+
+  # senticnet reference:
+  # sn = Senticnet('pt')
+  # concept_info = sn.concept('amor')
+  # polarity_value = sn.polarity_value('amor')
+  # polarity_intense = sn.polarity_intense('amor')
+  # moodtags = sn.moodtags('amor')
+  # semantics = sn.semantics('amor')
+  # sentics = sn.sentics('amor')
+
+
+  # iterates through all headlines, ...
+  for d in headlines:
+    # ... lines, ...
+    for l in headlines[d]:
+
+      # pol will sum polarities of all words in the headline (too simplistic, ok, but a start...)
+      pol = 0
+
+      # this is just a quick way to try and show what’s happening under the hood
+      polarities_list = ""
+
+      # ... and words.
+      for w in word_tokenize(l[1]):
+
+        # polarity for each word. if the polarity_value function fails, assumes a neutral (?) zero value
+        w_pol = 0
+
+        try:
+          w_pol = sn.polarity_value(w)
+
+          # it won't always work, but what this does is show the same number of
+          # characters for the polarity as the length of the word, so I can
+          # align one under the other
+          s_w_pol = str(w_pol) + '                   '
+          polarities_list += s_w_pol[:len(w)] + ' '
+
+        except:
+          # indicates there was no available polarity
+          s_w_pol = '***********************'
+          polarities_list += s_w_pol[:len(w)] + ' '
+
+        pol += w_pol
+      print('%s -> %.5s \n%s' % (l[1],pol,polarities_list))
+
 
 
 if __name__ == '__main__':
