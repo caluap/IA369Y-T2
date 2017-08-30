@@ -5,6 +5,8 @@ from nltk.corpus import stopwords
 from nltk.collocations import BigramCollocationFinder
 from nltk.metrics import BigramAssocMeasures
 
+from senticnet.senticnet import Senticnet
+
 
 # this is arbitrary, and should be better thought out in the future
 N_BIGRAMS = 12
@@ -52,11 +54,18 @@ def create_headline_list(filename):
   bcf = BigramCollocationFinder.from_words(word_list)
   bag_of_words.update(create_bag_of_words(bcf.nbest(BigramAssocMeasures.likelihood_ratio,N_BIGRAMS)))
   f.close()
-  return text
 
 def main():
-  text = create_headline_list('manchetesBrasildatabase/manchetesBrasildatabase.csv')
-  # print(text)
+  create_headline_list('manchetesBrasildatabase/manchetesBrasildatabase.csv')
+  sn = Senticnet('pt')
+
+  # print(headlines[('2017','agosto','23')])
+  for h in headlines[('2017','agosto','23')]:
+    for w in word_tokenize(h[1]):
+      try:
+        print('sim (%s): %s' % (w,sn.concept(w)) )
+      except:
+        print('nope: %s' % w)
 
 
 if __name__ == '__main__':
