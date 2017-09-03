@@ -1,4 +1,7 @@
 import re
+import nltk
+import random
+from nltk.tokenize import word_tokenize
 
 def clean_quotes(s):
   # ending quotes
@@ -11,6 +14,10 @@ def clean_quotes(s):
 # (probably should be smarter to decode them, but...)
 def clean_html_chars(s):
   return re.sub('&.+;','',s)
+
+
+
+all_words = []
 
 def create_headline_list(filename):
   f = open(filename,'rU')
@@ -29,14 +36,47 @@ def create_headline_list(filename):
     # -2 because there will be a newline character
     headline = clean_quotes(clean_html_chars(values[5][1:-2]))
 
-    headlines.append((date,newspaper,headline,polarity))
+    words = []
+
+    for w in word_tokenize(headline):
+      words.append(w.lower())
+      all_words.append(w.lower())
+
+    headlines.append((words,polarity))
 
   f.close()
   return headlines
 
+def find_features(doc, word_features):
+  words = set(doc)
+  features = {}
+  for w in word_features:
+    features[w] = (w in words)
+  return features
 
 def main():
-  headlines = create_headline_list('manchetesBrasildatabase/classified_headlines.csv')
+  global all_words
+
+  docs = create_headline_list('manchetesBrasildatabase/classified_headlines.csv')
+
+  random.shuffle(docs)
+
+  all_words = nltk.FreqDist(all_words)
+
+  word_features = list(all_words.keys())
+
+  featuresets = [
+    (find_features(rev, word_features), polarity)
+    for (rev, polarity) in docs]
+
+  cut_point = int(len(featuresets) * .7)
+  training_set = featuresets[:cut_point]
+  testing_set = featuresets[cut_point:]
+
+  classifier = nltk.NaiveBayesClassifier.train(training_set)
+  print("Naive Bayes Algo accuracy:", (nltk.classify.accuracy(classifier, testing_set)) * 100)
+  classifier.show_most_informative_features(15)
+
 
 
 if __name__ == '__main__':
