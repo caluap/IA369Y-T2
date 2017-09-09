@@ -2,6 +2,7 @@ import re
 import nltk
 import random
 from nltk.tokenize import word_tokenize
+from nltk.corpus import stopwords
 
 def clean_quotes(s):
   # ending quotes
@@ -25,6 +26,8 @@ def create_headline_list(filename):
 
   headlines = []
 
+  useless_words = stopwords.words('portuguese')
+
   for line in text:
     # removes polarity, day, month, year and newspaper.
     # Everything else assumed to be the headline.
@@ -39,8 +42,9 @@ def create_headline_list(filename):
     words = []
 
     for w in word_tokenize(headline):
-      words.append(w.lower())
-      all_words.append(w.lower())
+      if w not in useless_words:
+        words.append(w.lower())
+        all_words.append(w.lower())
 
     headlines.append((words,polarity))
 
@@ -69,7 +73,7 @@ def main():
     (find_features(rev, word_features), polarity)
     for (rev, polarity) in docs]
 
-  cut_point = int(len(featuresets) * .7)
+  cut_point = int(len(featuresets) * .85)
   training_set = featuresets[:cut_point]
   testing_set = featuresets[cut_point:]
 
