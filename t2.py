@@ -14,6 +14,7 @@ N_BIGRAMS = 12
 headlines = {}
 bag_of_words = {}
 headline_polarities = {}
+bad_bad_words = {}
 
 def create_bag_of_words(words):
   return dict([word, True] for word in words)
@@ -82,28 +83,35 @@ def main():
       # this is just a quick way to try and show what’s happening under the hood
       polarities_list = ""
 
+      bad_bad_words = stopwords.words('portuguese')
+
       # ... and words.
       for w in word_tokenize(l[1]):
 
         # polarity for each word. if the polarity_value function fails, assumes a neutral (?) zero value
         w_pol = 0
 
-        try:
-          w_pol = sn.polarity_value(w)
+        if (w not in bad_bad_words):
+          try:
+            w_pol = sn.polarity_value(w)
 
-          # it won't always work, but what this does is show the same number of
-          # characters for the polarity as the length of the word, so I can
-          # align one under the other
-          s_w_pol = str(w_pol) + '                   '
-          polarities_list += s_w_pol[:len(w)] + ' '
+            # it won't always work, but what this does is show the same number of
+            # characters for the polarity as the length of the word, so I can
+            # align one under the other
+            s_w_pol = str(w_pol) + '                   '
+            polarities_list += s_w_pol[:len(w)] + ' '
 
-        except:
-          # indicates there was no available polarity
-          s_w_pol = '***********************'
+          except:
+            # indicates there was no available polarity
+            s_w_pol = '***********************'
+            polarities_list += s_w_pol[:len(w)] + ' '
+        else:
+          s_w_pol = '||||||||||||||||||||||'
           polarities_list += s_w_pol[:len(w)] + ' '
 
         pol += w_pol
       print('%s -> %.5s \n%s' % (l[1],pol,polarities_list))
+      # print(bad_bad_words)
 
 
 
